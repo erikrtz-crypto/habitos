@@ -1,15 +1,10 @@
-# 🎯 Habit Tracker & Event-Driven Engine
+# Habit Tracker & Event-Driven Engine
 
-> Sistema Full Stack de seguimiento de hábitos y retos de 30 días impulsado por una API REST y un motor de cálculo de rachas (*streaks*) basado en registros de eventos inmutables.
-
-![Node.js](https://img.shields.io/badge/Node.js-24_LTS-green?logo=node.js)
-![Express](https://img.shields.io/badge/Express-5.x-lightgrey?logo=express)
-![Tests](https://img.shields.io/badge/Tests-11%2F11%20Passing-brightgreen)
-![License](https://img.shields.io/badge/License-ISC-blue)
+> Sistema Full Stack de seguimiento de hábitos y retos de 30 días impulsado por una API REST y un motor de cálculo de rachas (streaks) basado en registros de eventos inmutables.
 
 ---
 
-## 🏗️ Arquitectura del Sistema
+## Arquitectura del Sistema
 
 El proyecto evolucionó de una aplicación local basada en `localStorage` a una arquitectura desacoplada cliente-servidor:
 
@@ -29,16 +24,16 @@ habitos/
 
 ---
 
-## ⚡ Características Principales
+## Características Principales
 
 * **Motor de Rachas Basado en Eventos (Event Ledger):** En lugar de un simple contador volátil, cada sesión completada genera un evento inmutable con fecha y notas. La racha se computa en tiempo real analizando el calendario consecutivo.
-* **Manejo del "Día en Curso":** La racha no se reinicia a 0 si el usuario no ha completado el hábito hoy pero sí cumplió ayer; el sistema mantiene viva la racha en espera del cierre de la jornada.
+* **Manejo del Día en Curso:** La racha no se reinicia a 0 si el usuario no ha completado el hábito hoy pero sí cumplió ayer; el sistema mantiene viva la racha en espera del cierre de la jornada.
 * **Frontend Reactivo con Debounce:** Interfaz moderna en modo oscuro, barra de progreso animada, cuadrícula de 30 días y guardado automático con debounce de 600ms para notas.
-* **100% Cubierto con Pruebas Nativas:** 11 pruebas automatizadas utilizando `node:test` y `node:assert`, sin dependencias pesadas.
+* **Cubierto con Pruebas Nativas:** 11 pruebas automatizadas utilizando `node:test` y `node:assert`, sin dependencias pesadas.
 
 ---
 
-## 📡 Endpoints de la API REST
+## Endpoints de la API REST
 
 | Método | Endpoint | Descripción |
 | :--- | :--- | :--- |
@@ -53,7 +48,7 @@ habitos/
 
 ---
 
-## 🚀 Instalación y Puesta en Marcha
+## Instalación y Puesta en Marcha
 
 ### Prerrequisitos
 * Node.js v20+ o v24 LTS
