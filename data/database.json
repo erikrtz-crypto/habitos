@@ -1,0 +1,19 @@
+{
+  "habits": [
+    {
+      "id": "prog",
+      "title": "Programación",
+      "category": "tecnologia",
+      "targetMinutes": 25,
+      "createdAt": "2026-10-20"
+    },
+    {
+      "id": "read",
+      "title": "Lectura",
+      "category": "desarrollo-personal",
+      "targetMinutes": 10,
+      "createdAt": "2026-10-20"
+    }
+  ],
+  "logs": []
+}

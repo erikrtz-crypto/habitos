@@ -1,1 +1,401 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#111827"><title>Mi reto de 30 días</title><style>:root{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#0c1220;color:#eef2ff;padding:24px 16px 50px}.app{max-width:530px;margin:auto}h1{font-size:28px;margin:8px 0}p{color:#a8b3ca;line-height:1.5}.card{background:#182235;border:1px solid #30405a;border-radius:20px;padding:18px;margin:16px 0}.top{display:flex;justify-content:space-between;align-items:center}.big{font-size:30px;font-weight:800}.track{background:#334155;height:12px;border-radius:20px;overflow:hidden;margin-top:16px}.fill{height:100%;width:0;background:#34d399;transition:width .2s}.grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:15px}.day{border:1px solid #43536c;background:#243149;color:#e5e7eb;border-radius:12px;padding:10px 2px;min-height:57px;font-weight:700;font-size:17px;cursor:pointer}.day small{display:block;font-size:10px;color:#b3c0d3;font-weight:400}.day.selected{outline:2px solid #8b9fff}.day.complete{background:#14543f;border-color:#34d399}.day.partial{background:#4c3d26;border-color:#fbbf24}.checks{display:grid;gap:12px}.habit{display:flex;align-items:center;gap:12px;background:#243149;border-radius:12px;padding:15px;cursor:pointer}.habit input{width:24px;height:24px;accent-color:#34d399}.habit strong{display:block}.habit span{font-size:13px;color:#b3c0d3}button.action{background:#354660;color:white;border:0;border-radius:12px;padding:13px 16px;font-weight:700;cursor:pointer}.actions{display:flex;gap:8px;flex-wrap:wrap}textarea{width:100%;background:#243149;border:1px solid #4b5b75;border-radius:12px;color:white;padding:12px;font:inherit;min-height:80px}input[type=date]{background:#243149;color:white;border:1px solid #4b5b75;border-radius:8px;padding:8px}.hint{font-size:12px}.pill{font-size:12px;background:#243149;border-radius:99px;padding:6px 10px;color:#a8f0cf}</style></head><body><main class="app"><div class="top"><span class="pill">🌱 CONSTANCIA</span><span>📚 + 💻</span></div><h1>Mi reto de 30 días</h1><p>Después de desayunar: programación, lectura y luego videojuegos. Un toque por hábito.</p><section class="card"><div class="top"><div><strong>Progreso</strong><p style="margin:5px 0">Días con ambos hábitos completos</p></div><div class="big" id="progress">0/30</div></div><div class="track"><div class="fill" id="bar"></div></div><div class="grid" id="grid"></div></section><section class="card"><div class="top"><h2 id="heading" style="margin:0">Día 1</h2><span id="week" class="pill">Semana 1</span></div><p id="dateText"></p><div class="checks"><label class="habit"><input id="prog" type="checkbox"><div><strong>💻 Programación</strong><span id="progTime"></span></div></label><label class="habit"><input id="read" type="checkbox"><div><strong>📖 Lectura</strong><span id="readTime"></span></div></label></div><p>¿Qué aprendí hoy?</p><textarea id="note" placeholder="Una frase es suficiente..."></textarea></section><section class="card"><strong>Fecha de inicio</strong><p class="hint">Puedes ajustarla sin borrar tus marcas.</p><input id="start" type="date"><p class="hint">Tus marcas se guardan automáticamente en este navegador. Para mayor seguridad, exporta una copia periódicamente.</p><div class="actions"><button class="action" id="export">⬇ Exportar respaldo</button><button class="action" id="import">⬆ Importar respaldo</button><input type="file" id="file" accept="application/json" hidden></div></section><p class="hint">Consejo: si un día no puedes hacer la sesión completa, haz 5 minutos de programación y 2 de lectura. No necesitas empezar de cero.</p></main><script>const KEY='reto_habitos_v1';let data;try{data=JSON.parse(localStorage.getItem(KEY))||{}}catch{data={}}data.days??={};data.start??='2026-10-16';let selected=1;const $=id=>document.getElementById(id);const save=()=>localStorage.setItem(KEY,JSON.stringify(data));const target=(d)=>d<=7?[15,5]:d<=14?[25,10]:d<=21?[35,15]:[45,20];function render(){let count=0;$('grid').innerHTML='';for(let d=1;d<=30;d++){const v=data.days[d]||{},complete=v.prog&&v.read;if(complete)count++;const b=document.createElement('button');b.className='day '+(d===selected?'selected ':'')+(complete?'complete':v.prog||v.read?'partial':'');b.innerHTML='<small>DÍA</small>'+d+(complete?' ✓':v.prog||v.read?' •':'');b.onclick=()=>{selected=d;render()};$('grid').append(b)}$('progress').textContent=count+'/30';$('bar').style.width=(count/30*100)+'%';$('heading').textContent='Día '+selected;$('week').textContent='Semana '+Math.ceil(selected/7);let dt=new Date(data.start+'T12:00:00');dt.setDate(dt.getDate()+selected-1);$('dateText').textContent=dt.toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long',year:'numeric'});let [p,r]=target(selected);$('progTime').textContent=p+' minutos';$('readTime').textContent=r+' minutos';$('prog').checked=!!data.days[selected]?.prog;$('read').checked=!!data.days[selected]?.read;$('note').value=data.days[selected]?.note||'';$('start').value=data.start}function update(k,v){data.days[selected]??={};data.days[selected][k]=v;save();if(k!=='note')render()}$('prog').onchange=e=>update('prog',e.target.checked);$('read').onchange=e=>update('read',e.target.checked);$('note').oninput=e=>update('note',e.target.value);$('start').onchange=e=>{data.start=e.target.value;save();render()};$('export').onclick=()=>{let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));a.download='respaldo-habitos.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};$('import').onclick=()=>$('file').click();$('file').onchange=async e=>{let f=e.target.files[0];if(!f)return;try{let obj=JSON.parse(await f.text());if(!obj.days||typeof obj.days!=='object')throw Error();if(confirm('¿Reemplazar el progreso actual con este respaldo?')){data=obj;save();render()}}catch{alert('Archivo de respaldo no válido')}};render();</script></body></html>
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#111827">
+  <title>Mi reto de 30 días — Hábitos & API</title>
+  <style>
+    :root {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color-scheme: dark;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #0c1220;
+      color: #eef2ff;
+      padding: 24px 16px 50px;
+    }
+    .app { max-width: 530px; margin: auto; }
+    h1 { font-size: 28px; margin: 8px 0; }
+    p { color: #a8b3ca; line-height: 1.5; }
+    .card {
+      background: #182235;
+      border: 1px solid #30405a;
+      border-radius: 20px;
+      padding: 18px;
+      margin: 16px 0;
+    }
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .big { font-size: 30px; font-weight: 800; }
+    .track {
+      background: #334155;
+      height: 12px;
+      border-radius: 20px;
+      overflow: hidden;
+      margin-top: 16px;
+    }
+    .fill {
+      height: 100%;
+      width: 0;
+      background: #34d399;
+      transition: width .2s ease;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 8px;
+      margin-top: 15px;
+    }
+    .day {
+      border: 1px solid #43536c;
+      background: #243149;
+      color: #e5e7eb;
+      border-radius: 12px;
+      padding: 10px 2px;
+      min-height: 57px;
+      font-weight: 700;
+      font-size: 17px;
+      cursor: pointer;
+      transition: all .15s ease;
+    }
+    .day small {
+      display: block;
+      font-size: 10px;
+      color: #b3c0d3;
+      font-weight: 400;
+    }
+    .day.selected { outline: 2px solid #8b9fff; }
+    .day.complete { background: #14543f; border-color: #34d399; }
+    .day.partial { background: #4c3d26; border-color: #fbbf24; }
+    .checks { display: grid; gap: 12px; }
+    .habit {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #243149;
+      border-radius: 12px;
+      padding: 15px;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .habit:hover { background: #2b3b57; }
+    .habit input {
+      width: 24px;
+      height: 24px;
+      accent-color: #34d399;
+      cursor: pointer;
+    }
+    .habit strong { display: block; }
+    .habit span { font-size: 13px; color: #b3c0d3; }
+    button.action {
+      background: #354660;
+      color: white;
+      border: 0;
+      border-radius: 12px;
+      padding: 13px 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    button.action:hover { background: #435878; }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    textarea {
+      width: 100%;
+      background: #243149;
+      border: 1px solid #4b5b75;
+      border-radius: 12px;
+      color: white;
+      padding: 12px;
+      font: inherit;
+      min-height: 80px;
+      resize: vertical;
+    }
+    input[type=date] {
+      background: #243149;
+      color: white;
+      border: 1px solid #4b5b75;
+      border-radius: 8px;
+      padding: 8px;
+    }
+    .hint { font-size: 12px; }
+    .pill {
+      font-size: 12px;
+      background: #243149;
+      border-radius: 99px;
+      padding: 6px 12px;
+      color: #a8f0cf;
+      font-weight: 600;
+    }
+    .pill.server-on { background: #064e3b; color: #6ee7b7; border: 1px solid #059669; }
+    .pill.server-off { background: #7f1d1d; color: #fca5a5; border: 1px solid #dc2626; }
+    .streaks-bar {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    .streak-badge {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #f59e0b;
+    }
+  </style>
+</head>
+<body>
+<main class="app">
+  <div class="top">
+    <span class="pill" id="statusPill">⏳ Conectando...</span>
+    <span id="headerIcons">📚 + 💻</span>
+  </div>
+
+  <div class="streaks-bar" id="streaksContainer"></div>
+
+  <h1>Mi reto de 30 días</h1>
+  <p>Después de desayunar: programación, lectura y luego videojuegos. Sincronizado en tiempo real con la API REST.</p>
+
+  <!-- Tarjeta de Progreso General -->
+  <section class="card">
+    <div class="top">
+      <div>
+        <strong>Progreso del Reto</strong>
+        <p style="margin:5px 0">Días con ambos hábitos completos</p>
+      </div>
+      <div class="big" id="progress">0/30</div>
+    </div>
+    <div class="track"><div class="fill" id="bar"></div></div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <!-- Tarjeta de Gestión del Día Seleccionado -->
+  <section class="card">
+    <div class="top">
+      <h2 id="heading" style="margin:0">Día 1</h2>
+      <span id="week" class="pill">Semana 1</span>
+    </div>
+    <p id="dateText"></p>
+
+    <div class="checks">
+      <label class="habit">
+        <input id="prog" type="checkbox">
+        <div>
+          <strong>💻 Programación</strong>
+          <span id="progTime"></span>
+        </div>
+      </label>
+
+      <label class="habit">
+        <input id="read" type="checkbox">
+        <div>
+          <strong>📖 Lectura</strong>
+          <span id="readTime"></span>
+        </div>
+      </label>
+    </div>
+
+    <p>¿Qué aprendí hoy?</p>
+    <textarea id="note" placeholder="Una frase es suficiente..."></textarea>
+  </section>
+
+  <!-- Configuración de Inicio -->
+  <section class="card">
+    <strong>Fecha de inicio del reto</strong>
+    <p class="hint">Puedes ajustarla sin perder tu historial de eventos en el servidor.</p>
+    <input id="start" type="date">
+    <p class="hint">Persistencia garantizada por el motor REST de Node.js.</p>
+  </section>
+</main>
+
+<script>
+  // CONFIGURACIÓN DE CONEXIÓN CON LA API
+  const API_BASE = window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1')
+    ? window.location.origin
+    : 'http://localhost:3000';
+
+  let selectedDay = 1;
+  let serverData = {
+    habits: [],
+    logs: [],
+    startDate: '2026-10-16'
+  };
+
+  const $ = id => document.getElementById(id);
+  const target = (d) => d <= 7 ? [15, 5] : d <= 14 ? [25, 10] : d <= 21 ? [35, 15] : [45, 20];
+
+  // Helper para obtener fecha YYYY-MM-DD del día seleccionado
+  function getDateForDay(dayNumber) {
+    const dt = new Date(serverData.startDate + 'T12:00:00');
+    dt.setDate(dt.getDate() + dayNumber - 1);
+    const y = dt.getFullYear();
+    const m = String(dt.getMonth() + 1).padStart(2, '0');
+    const d = String(dt.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+
+  // 1. CARGAR DATOS DESDE LA API
+  async function loadData() {
+    try {
+      const [resHabits, resLogs] = await Promise.all([
+        fetch(`${API_BASE}/api/habits`),
+        fetch(`${API_BASE}/api/logs`)
+      ]);
+
+      if (!resHabits.ok || !resLogs.ok) throw new Error('Error al conectar con la API');
+
+      const habitsJson = await resHabits.json();
+      const logsJson = await resLogs.json();
+
+      serverData.habits = habitsJson.data || [];
+      serverData.logs = logsJson.logs || [];
+      serverData.startDate = logsJson.startDate || serverData.startDate;
+
+      $('statusPill').textContent = '🟢 API Conectada';
+      $('statusPill').className = 'pill server-on';
+
+      renderStreaks();
+      render();
+    } catch (err) {
+      console.warn('API no disponible, operando en modo desconectado:', err);
+      $('statusPill').textContent = '🔴 Servidor Offline';
+      $('statusPill').className = 'pill server-off';
+    }
+  }
+
+  // 2. RENDERIZAR BADGES DE RACHAS EN EL ENCABEZADO
+  function renderStreaks() {
+    const container = $('streaksContainer');
+    container.innerHTML = '';
+
+    serverData.habits.forEach(h => {
+      const badge = document.createElement('div');
+      badge.className = 'streak-badge';
+      const streak = h.metrics ? h.metrics.currentStreak : 0;
+      const icon = h.id === 'prog' ? '💻' : '📖';
+      badge.innerHTML = `${icon} Racha ${h.title}: <strong>${streak} días</strong> 🔥`;
+      container.appendChild(badge);
+    });
+  }
+
+  // 3. RENDERIZAR INTERFAZ Y CUADRÍCULA
+  function render() {
+    let completedCount = 0;
+    $('grid').innerHTML = '';
+
+    for (let d = 1; d <= 30; d++) {
+      const dateStr = getDateForDay(d);
+      const isProgDone = serverData.logs.some(l => l.habitId === 'prog' && l.date === dateStr && l.completed);
+      const isReadDone = serverData.logs.some(l => l.habitId === 'read' && l.date === dateStr && l.completed);
+      const isComplete = isProgDone && isReadDone;
+      const isPartial = isProgDone || isReadDone;
+
+      if (isComplete) completedCount++;
+
+      const btn = document.createElement('button');
+      btn.className = 'day ' + (d === selectedDay ? 'selected ' : '') + (isComplete ? 'complete' : isPartial ? 'partial' : '');
+      btn.innerHTML = `<small>DÍA</small>${d}${isComplete ? ' ✓' : isPartial ? ' •' : ''}`;
+      btn.onclick = () => {
+        selectedDay = d;
+        render();
+      };
+      $('grid').appendChild(btn);
+    }
+
+    $('progress').textContent = `${completedCount}/30`;
+    $('bar').style.width = `${(completedCount / 30) * 100}%`;
+    $('heading').textContent = `Día ${selectedDay}`;
+    $('week').textContent = `Semana ${Math.ceil(selectedDay / 7)}`;
+
+    const selectedDateStr = getDateForDay(selectedDay);
+    const dt = new Date(selectedDateStr + 'T12:00:00');
+    $('dateText').textContent = dt.toLocaleDateString('es-MX', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+
+    const [progMinutes, readMinutes] = target(selectedDay);
+    $('progTime').textContent = `${progMinutes} minutos`;
+    $('readTime').textContent = `${readMinutes} minutos`;
+
+    // Estado de checkboxes para el día seleccionado
+    $('prog').checked = serverData.logs.some(l => l.habitId === 'prog' && l.date === selectedDateStr && l.completed);
+    $('read').checked = serverData.logs.some(l => l.habitId === 'read' && l.date === selectedDateStr && l.completed);
+
+    // Buscar nota de esa fecha
+    const noteLog = serverData.logs.find(l => l.date === selectedDateStr && l.note);
+    $('note').value = noteLog ? noteLog.note : '';
+    $('start').value = serverData.startDate;
+  }
+
+  // 4. ACCIÓN: ALTERNAR CUMPLIMIENTO CON LA API (TOGGLE)
+  async function toggleHabit(habitId) {
+    const dateStr = getDateForDay(selectedDay);
+    try {
+      const res = await fetch(`${API_BASE}/api/habits/${habitId}/toggle`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ date: dateStr })
+      });
+
+      if (!res.ok) throw new Error('Error al actualizar');
+      await loadData(); // Recarga el estado completo desde el backend
+    } catch (err) {
+      alert('Error comunicándose con el servidor');
+      console.error(err);
+    }
+  }
+
+  $('prog').onchange = () => toggleHabit('prog');
+  $('read').onchange = () => toggleHabit('read');
+
+  // 5. ACCIÓN: GUARDAR NOTA
+  let noteTimeout;
+  $('note').oninput = (e) => {
+    clearTimeout(noteTimeout);
+    const text = e.target.value;
+    const dateStr = getDateForDay(selectedDay);
+
+    // Debounce de 600ms para no saturar peticiones
+    noteTimeout = setTimeout(async () => {
+      try {
+        await fetch(`${API_BASE}/api/notes`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ date: dateStr, note: text })
+        });
+      } catch (err) {
+        console.error('Error guardando nota:', err);
+      }
+    }, 600);
+  };
+
+  // 6. ACCIÓN: CAMBIAR FECHA DE INICIO
+  $('start').onchange = async (e) => {
+    const newStart = e.target.value;
+    try {
+      await fetch(`${API_BASE}/api/settings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ startDate: newStart })
+      });
+      serverData.startDate = newStart;
+      render();
+    } catch (err) {
+      console.error('Error guardando fecha de inicio:', err);
+    }
+  };
+
+  // Arranque inicial
+  loadData();
+</script>
+</body>
+</html>
